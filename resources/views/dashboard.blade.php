@@ -13,7 +13,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="criarAnotacaoLabel">Modal title</h1>
+                        <h1 class="modal-title fs-5" id="criarAnotacaoLabel">Criar Anotação</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form action="{{ route('create.note') }}" method="post">
@@ -49,9 +49,22 @@
 
     <div class="d-flex flex-wrap justify-content-around gap-2">
         @forelse($notes as $note)
-            <div class="card border border-2 shadow p-3" style="background-color: {{ $note->color }};">
-                <div class="card-header">{{ $note->title }}</div>
-                <div class="card-body">{{ $note->content }}</div>
+            <div class="card border border-2 shadow p-3" style="background-color: {{ $note->color }}95;">
+                <div class="card-header" style="background-color: {{ $note->color }}45;">
+                    {{ $note->title }}
+                </div>
+                <div class="card-body">
+                    {{ $note->content }}
+                </div>
+                {{-- Edição --}}
+                <!-- Button trigger modal -->
+                <div class="d-flex flex-wrap justify-content-end">
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editar_anotacao"
+                    data-bs-note="{{ json_encode($note) }}">
+                        Editar
+                    </button>
+                </div>
+                {{-- Exclusão --}}
             </div>
         @empty
             <div class="alert alert-danger">
@@ -59,4 +72,48 @@
             </div>
         @endforelse
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="editar_anotacao" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('update.note') }}" method="post">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="id">
+                        <label>Título:</label>
+                        <input class="form-control" type="text" name="title" id="title">
+                        <label>Conteúdo:</label>
+                        <textarea class="form-control" name="content" cols="30" rows="4" id="content"></textarea>
+                        <label>Cor:</label>
+                        <input class="form-control" type="color" name="color" id="color">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        <button type="submit" class="btn btn-success">
+                            Editar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+    <script>
+        const exampleModal = document.getElementById('editar_anotacao')
+        exampleModal.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget
+            const recipient = button.getAttribute('data-bs-note')
+            const note = JSON.parse(recipient);
+            document.getElementById('id').value = note.id;
+            document.getElementById('title').value = note.title;
+            document.getElementById('content').value = note.content;
+            document.getElementById('color').value = note.color;
+        })
+    </script>
 @endsection
