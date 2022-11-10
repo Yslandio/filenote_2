@@ -65,6 +65,7 @@
                     </button>
                 </div>
                 {{-- Exclusão --}}
+                
             </div>
         @empty
             <div class="alert alert-danger">
