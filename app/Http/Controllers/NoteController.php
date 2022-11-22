@@ -8,8 +8,11 @@ use Illuminate\Support\Facades\Auth;
 
 class NoteController extends Controller
 {
-    public function dashboard() {
-        $notes = Note::where('user_id', Auth::user()->id)->get();
+    public function dashboard(Request $request) {
+        $notes = Note::where('user_id', Auth::user()->id)
+                ->where('title', 'LIKE', '%'.$request->pesquisa.'%')
+                ->orWhere('content', 'LIKE', '%'.$request->pesquisa.'%')
+                ->paginate(3);
         return view('dashboard', compact('notes'));
     }
 
@@ -42,6 +45,11 @@ class NoteController extends Controller
 
         Note::find($request->id)->update($note);
 
+        return back();
+    }
+
+    public function delete(Request $request) {
+        Note::find($request->id)->delete();
         return back();
     }
 }

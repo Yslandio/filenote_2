@@ -17,4 +17,7 @@ Route::post('criar_anotacao', [NoteController::class, 'create'])
 Route::post('editar_anotacao', [NoteController::class, 'update'])
     ->middleware(['auth'])->name('update.note');
 
+Route::post('excluir_anotacao', [NoteController::class, 'delete'])
+    ->middleware(['auth'])->name('delete.note');
+
 require __DIR__.'/auth.php';

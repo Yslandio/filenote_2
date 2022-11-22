@@ -1,77 +1,96 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="d-flex justify-content-center
-        bg-light border border-2 p-3 my-4">
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#criarAnotacao">
-            Criar Anotação
-        </button>
+    <div class="container">
+        <div class="d-flex gap-2 justify-content-between
+            bg-light border border-2 p-3 my-4">
+            <form class="d-flex gap-2" action="{{ route('dashboard') }}" method="get">
+                <input class="form-control w-auto" type="text" name="pesquisa" placeholder="Pesquisar">
+                <button class="btn btn-secondary" type="submit">Pesquisar</button>
+            </form>
 
-        <!-- Modal -->
-        <div class="modal fade" id="criarAnotacao" tabindex="-1" aria-labelledby="criarAnotacaoLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="criarAnotacaoLabel">Criar Anotação</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#criarAnotacao">
+                Criar Anotação
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="criarAnotacao" tabindex="-1" aria-labelledby="criarAnotacaoLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="criarAnotacaoLabel">Criar Anotação</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{{ route('create.note') }}" method="post">
+                            @csrf
+                            <div class="modal-body">
+                                <label>Título:</label>
+                                <input class="form-control" type="text" name="title">
+                                <label>Conteúdo:</label>
+                                <textarea class="form-control" name="content" cols="30" rows="4"></textarea>
+                                <label>Cor:</label>
+                                <input class="form-control" type="color" name="color">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                <button type="submit" class="btn btn-primary">
+                                    Criar</button>
+                            </div>
+                        </form>
                     </div>
-                    <form action="{{ route('create.note') }}" method="post">
-                        @csrf
-                        <div class="modal-body">
-                            <label>Título:</label>
-                            <input class="form-control" type="text" name="title">
-                            <label>Conteúdo:</label>
-                            <textarea class="form-control" name="content" cols="30" rows="4"></textarea>
-                            <label>Cor:</label>
-                            <input class="form-control" type="color" name="color">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                            <button type="submit" class="btn btn-primary">
-                                Criar</button>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
-    </div>
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <div class="d-flex flex-wrap justify-content-around gap-2">
-        @forelse($notes as $note)
-            <div class="card border border-2 shadow p-3" style="background-color: {{ $note->color }}95;">
-                <div class="card-header" style="background-color: {{ $note->color }}45;">
-                    {{ $note->title }}
-                </div>
-                <div class="card-body">
-                    {{ $note->content }}
-                </div>
-                {{-- Edição --}}
-                <!-- Button trigger modal -->
-                <div class="d-flex flex-wrap justify-content-end">
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editar_anotacao"
-                    data-bs-note="{{ json_encode($note) }}">
-                        Editar
-                    </button>
-                </div>
-                {{-- Exclusão --}}
-                
-            </div>
-        @empty
+        @if ($errors->any())
             <div class="alert alert-danger">
-                Nenhuma anotação cadastrada!
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
-        @endforelse
+        @endif
+
+        {{ $notes->appends(['pesquisa' => request()->get('pesquisa')])
+            ->links('vendor.pagination.bootstrap-4') }}
+
+        <div class="d-flex flex-wrap justify-content-start g-2">
+            @forelse($notes as $note)
+                <div class="col-12 col-md-6 col-lg4 p-2">
+                    <div class="card border border-2 shadow p-3 w-100 " style="background-color: {{ $note->color }}95;">
+                        <div class="card-header" style="background-color: {{ $note->color }}45;">
+                            {{ $note->title }}
+                        </div>
+                        <div class="card-body">
+                            {{ $note->content }}
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 justify-content-end">
+                            {{-- Edição --}}
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editar_anotacao"
+                            data-bs-note="{{ json_encode($note) }}">
+                                Editar
+                            </button>
+                            {{-- Exclusão --}}
+                            <form action="{{ route('delete.note', ['id' => $note->id]) }}" method="post">
+                                @csrf
+                                {{-- <input type="hidden" name="id" value="{{ $note->id }}"> --}}
+                                <button class="btn btn-danger" type="submit">
+                                    Excluir
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="alert alert-danger">
+                    Nenhuma anotação cadastrada!
+                </div>
+            @endforelse
+        </div>
     </div>
 
     <!-- Modal -->
